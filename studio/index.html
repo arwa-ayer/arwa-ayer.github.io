@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studio TikTok · Nano Banana</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍌</text></svg>" />
+<style>
+  :root { --bg:#0f0f14; --card:#1a1a23; --line:#2c2c3a; --text:#f2f2f5; --mute:#9a9aab; --acc:#ffd23f; --acc2:#fe2c55; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:960px; margin:0 auto; padding:20px 16px 80px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  h2 { font-size:1.05rem; margin:0 0 12px; }
+  p.sub { color:var(--mute); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-size:.85rem; color:var(--mute); margin:10px 0 4px; }
+  input, textarea, select { width:100%; background:#111118; color:var(--text); border:1px solid var(--line); border-radius:10px; padding:10px; font:inherit; }
+  textarea { min-height:70px; resize:vertical; }
+  .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  button { background:var(--acc); color:#111; border:0; border-radius:10px; padding:11px 16px; font:inherit; font-weight:700; cursor:pointer; margin-top:12px; }
+  button.alt { background:#2c2c3a; color:var(--text); }
+  button.tt { background:var(--acc2); color:#fff; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .status { margin-top:10px; font-size:.9rem; color:var(--mute); white-space:pre-wrap; }
+  .status.err { color:#ff7a7a; }
+  .scenes { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; }
+  .scene { background:#111118; border:1px solid var(--line); border-radius:12px; padding:8px; }
+  .scene .img { aspect-ratio:9/16; background:#22222c; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; color:var(--mute); font-size:.8rem; text-align:center; }
+  .scene img { width:100%; height:100%; object-fit:cover; display:block; }
+  .scene textarea { min-height:60px; font-size:.8rem; margin-top:6px; }
+  .scene input { font-size:.8rem; margin-top:6px; }
+  .scene button { margin-top:6px; padding:7px 10px; font-size:.8rem; width:100%; }
+  .preview { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  canvas, video { width:270px; aspect-ratio:9/16; background:#000; border-radius:12px; }
+  .hint { font-size:.8rem; color:var(--mute); }
+  .refimg { max-width:90px; border-radius:8px; margin-top:8px; display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🍌 Studio TikTok · Nano Banana</h1>
+  <p class="sub">Sujet → scènes (Gemini) → images (Nano Banana) → vidéo 9:16 → publication TikTok.</p>
+
+  <section class="card">
+    <h2>1. Clé API Gemini</h2>
+    <label for="apiKey">Clé API (créée sur aistudio.google.com/apikey). Elle reste dans ce navigateur, elle n'est envoyée qu'à Google.</label>
+    <input id="apiKey" type="password" placeholder="AIza…" autocomplete="off" />
+    <div class="row">
+      <div>
+        <label for="imgModel">Modèle image</label>
+        <select id="imgModel">
+          <option value="gemini-2.5-flash-image">Nano Banana (gemini-2.5-flash-image)</option>
+          <option value="gemini-3-pro-image-preview">Nano Banana Pro (gemini-3-pro-image-preview)</option>
+        </select>
+      </div>
+      <div>
+        <label for="txtModel">Modèle texte (scénario)</label>
+        <input id="txtModel" value="gemini-2.5-flash" />
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Idée de la vidéo</h2>
+    <label for="topic">Sujet</label>
+    <textarea id="topic" placeholder="Ex : 5 astuces pour bien dormir, racontées par un chat roux"></textarea>
+    <div class="row">
+      <div><label for="nScenes">Nombre de scènes</label><input id="nScenes" type="number" min="1" max="10" value="5" /></div>
+      <div><label for="secPer">Secondes par scène</label><input id="secPer" type="number" min="1" max="10" step="0.5" value="3" /></div>
+      <div><label for="lang">Langue des textes</label><input id="lang" value="français" /></div>
+    </div>
+    <label for="style">Style visuel</label>
+    <input id="style" value="photo réaliste, lumière douce, couleurs vives, format vertical" />
+    <label for="refFile">Image de référence (optionnel : personnage ou produit à garder dans toutes les scènes)</label>
+    <input id="refFile" type="file" accept="image/*" />
+    <img id="refPreview" class="refimg" alt="" />
+    <button id="btnPlan">✍️ Écrire les scènes</button>
+    <button id="btnAll" class="alt">⚡ Tout faire (scènes + images + vidéo)</button>
+    <div id="planStatus" class="status"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Scènes et images</h2>
+    <div id="scenes" class="scenes"><span class="hint">Les scènes apparaîtront ici.</span></div>
+    <button id="btnImgs" disabled>🍌 Générer toutes les images</button>
+    <div id="imgStatus" class="status"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Vidéo</h2>
+    <label for="music">Musique (optionnel, fichier audio)</label>
+    <input id="music" type="file" accept="audio/*" />
+    <button id="btnVideo" disabled>🎬 Créer la vidéo</button>
+    <div id="vidStatus" class="status"></div>
+    <div class="preview" style="margin-top:12px">
+      <canvas id="canvas" width="1080" height="1920"></canvas>
+      <video id="out" controls playsinline style="display:none"></video>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Publier sur TikTok</h2>
+    <label for="caption">Légende et hashtags</label>
+    <textarea id="caption"></textarea>
+    <button id="btnShare" class="tt" disabled>📱 Partager vers TikTok</button>
+    <button id="btnDl" class="alt" disabled>⬇️ Télécharger la vidéo</button>
+    <button id="btnCopy" class="alt">📋 Copier la légende</button>
+    <p class="hint">Sur téléphone, « Partager » ouvre le menu de partage : choisissez TikTok, puis collez la légende. Sur ordinateur, téléchargez la vidéo et importez-la sur tiktok.com/upload.</p>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const API = "https://generativelanguage.googleapis.com/v1beta/models/";
+let scenes = [];        // {prompt, text, img: HTMLImageElement|null, dataUrl}
+let refImage = null;    // {mime, b64}
+let videoBlob = null;
+
+// ---------- persistence ----------
+for (const id of ["apiKey", "imgModel", "txtModel", "style", "lang"]) {
+  const v = localStorage.getItem("nb_" + id);
+  if (v) $(id).value = v;
+  $(id).addEventListener("change", () => localStorage.setItem("nb_" + id, $(id).value));
+}
+
+function setStatus(el, msg, err = false) { el.textContent = msg; el.classList.toggle("err", err); }
+function key() {
+  const k = $("apiKey").value.trim();
+  if (!k) throw new Error("Ajoutez d'abord votre clé API Gemini (étape 1).");
+  return k;
+}
+
+async function gemini(model, body) {
+  const r = await fetch(API + model + ":generateContent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": key() },
+    body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error?.message || ("Erreur HTTP " + r.status));
+  return j;
+}
+
+// ---------- reference image ----------
+$("refFile").addEventListener("change", async (e) => {
+  const f = e.target.files[0];
+  if (!f) { refImage = null; $("refPreview").style.display = "none"; return; }
+  const dataUrl = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(f); });
+  refImage = { mime: f.type || "image/jpeg", b64: dataUrl.split(",")[1] };
+  $("refPreview").src = dataUrl; $("refPreview").style.display = "block";
+});
+
+// ---------- 1. plan scenes ----------
+async function planScenes() {
+  const topic = $("topic").value.trim();
+  if (!topic) throw new Error("Écrivez un sujet.");
+  const n = Math.max(1, Math.min(10, +$("nScenes").value || 5));
+  setStatus($("planStatus"), "Gemini écrit les scènes…");
+  const prompt =
+`Tu es scénariste de vidéos TikTok virales. Sujet : "${topic}".
+Écris ${n} scènes pour une vidéo verticale courte. Langue des textes à l'écran : ${$("lang").value}.
+Style visuel : ${$("style").value}.
+${refImage ? "Une image de référence (personnage/produit) sera fournie : chaque scène doit la mettre en scène." : ""}
+La 1re scène doit accrocher en moins de 2 secondes.
+Réponds uniquement en JSON :
+{"scenes":[{"image_prompt":"description visuelle détaillée en anglais, cadrage vertical 9:16, sans texte dans l'image","text":"texte court à l'écran (max 8 mots)"}],"caption":"légende TikTok avec 4 à 6 hashtags"}`;
+  const j = await gemini($("txtModel").value.trim(), {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" },
+  });
+  const txt = j.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+  const data = JSON.parse(txt.replace(/^```json|```$/g, "").trim());
+  scenes = (data.scenes || []).slice(0, n).map((s) => ({ prompt: s.image_prompt, text: s.text, img: null, dataUrl: null }));
+  $("caption").value = data.caption || "";
+  renderScenes();
+  setStatus($("planStatus"), `✅ ${scenes.length} scènes prêtes. Vous pouvez les modifier avant de générer les images.`);
+}
+
+function renderScenes() {
+  const box = $("scenes");
+  box.innerHTML = "";
+  scenes.forEach((s, i) => {
+    const d = document.createElement("div");
+    d.className = "scene";
+    d.innerHTML = `<div class="img">${s.dataUrl ? `<img src="${s.dataUrl}" alt="">` : "Scène " + (i + 1)}</div>
+      <input value="" placeholder="Texte à l'écran" />
+      <textarea placeholder="Prompt image"></textarea>
+      <button class="alt">🍌 ${s.dataUrl ? "Regénérer" : "Générer"}</button>`;
+    const [inp, ta, btn] = [d.querySelector("input"), d.querySelector("textarea"), d.querySelector("button")];
+    inp.value = s.text || ""; ta.value = s.prompt || "";
+    inp.oninput = () => (s.text = inp.value);
+    ta.oninput = () => (s.prompt = ta.value);
+    btn.onclick = () => run(btn, $("imgStatus"), () => genImage(i));
+    box.appendChild(d);
+  });
+  $("btnImgs").disabled = !scenes.length;
+  $("btnVideo").disabled = !scenes.some((s) => s.img);
+}
+
+// ---------- 2. Nano Banana images ----------
+async function genImage(i) {
+  const s = scenes[i];
+  setStatus($("imgStatus"), `🍌 Nano Banana génère l'image ${i + 1}/${scenes.length}…`);
+  const parts = [{ text: `${s.prompt}. Style: ${$("style").value}. Vertical 9:16 composition. No text, no letters, no watermark.` }];
+  if (refImage) parts.push({ inline_data: { mime_type: refImage.mime, data: refImage.b64 } });
+  const body = {
+    contents: [{ parts }],
+    generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "9:16" } },
+  };
+  let j;
+  try { j = await gemini($("imgModel").value, body); }
+  catch (e) {
+    // anciens modèles : sans imageConfig
+    if (/imageConfig|aspect/i.test(e.message)) { delete body.generationConfig.imageConfig; j = await gemini($("imgModel").value, body); }
+    else throw e;
+  }
+  const part = j.candidates?.[0]?.content?.parts?.find((p) => p.inlineData || p.inline_data);
+  const inl = part?.inlineData || part?.inline_data;
+  if (!inl) throw new Error("Pas d'image reçue (scène " + (i + 1) + "). Le prompt a peut-être été bloqué : modifiez-le et réessayez.");
+  s.dataUrl = `data:${inl.mimeType || inl.mime_type || "image/png"};base64,${inl.data}`;
+  s.img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = s.dataUrl; });
+  renderScenes();
+}
+
+async function genAllImages() {
+  for (let i = 0; i < scenes.length; i++) if (!scenes[i].img) await genImage(i);
+  setStatus($("imgStatus"), "✅ Toutes les images sont prêtes.");
+}
+
+// ---------- 3. video (canvas + MediaRecorder) ----------
+function drawFrame(ctx, s, t, W, H, zoomIn) {
+  const im = s.img;
+  const z = zoomIn ? 1 + 0.12 * t : 1.12 - 0.12 * t;           // Ken Burns
+  const scale = Math.max(W / im.width, H / im.height) * z;
+  const w = im.width * scale, h = im.height * scale;
+  const dx = (W - w) / 2 + (zoomIn ? -20 : 20) * t, dy = (H - h) / 2;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(im, dx, dy, w, h);
+  if (s.text) {
+    ctx.font = "800 78px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const lines = wrap(ctx, s.text, W - 160);
+    const y0 = H * 0.72 - ((lines.length - 1) * 96) / 2;
+    const pop = Math.min(1, t * 6);
+    ctx.save(); ctx.globalAlpha = pop;
+    lines.forEach((ln, k) => {
+      const y = y0 + k * 96;
+      const tw = ctx.measureText(ln).width;
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      roundRect(ctx, W / 2 - tw / 2 - 28, y - 52, tw + 56, 104, 22); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.fillText(ln, W / 2, y + 4);
+    });
+    ctx.restore();
+  }
+}
+function wrap(ctx, text, max) {
+  const words = text.split(/\s+/); const out = []; let cur = "";
+  for (const w of words) { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > max && cur) { out.push(cur); cur = w; } else cur = t; }
+  if (cur) out.push(cur); return out;
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+
+function pickMime() {
+  for (const m of ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"])
+    if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+  return "";
+}
+
+async function makeVideo() {
+  const ready = scenes.filter((s) => s.img);
+  if (!ready.length) throw new Error("Générez au moins une image.");
+  const per = Math.max(1, +$("secPer").value || 3) * 1000;
+  const total = per * ready.length;
+  const cv = $("canvas"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height;
+  const stream = cv.captureStream(30);
+
+  let audioEl = null, actx = null;
+  const mf = $("music").files[0];
+  if (mf) {
+    actx = new AudioContext();
+    audioEl = new Audio(URL.createObjectURL(mf)); audioEl.loop = true;
+    const src = actx.createMediaElementSource(audioEl);
+    const dest = actx.createMediaStreamDestination();
+    src.connect(dest);
+    dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+  }
+
+  const mime = pickMime();
+  const rec = new MediaRecorder(stream, { mimeType: mime || undefined, videoBitsPerSecond: 8_000_000 });
+  const chunks = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const done = new Promise((res) => (rec.onstop = res));
+
+  $("out").style.display = "none";
+  rec.start(250);
+  if (audioEl) { await actx.resume(); audioEl.currentTime = 0; await audioEl.play(); }
+  const t0 = performance.now();
+  await new Promise((res) => {
+    const tick = () => {
+      const el = performance.now() - t0;
+      if (el >= total) return res();
+      const idx = Math.min(ready.length - 1, Math.floor(el / per));
+      const local = (el - idx * per) / per;
+      drawFrame(ctx, ready[idx], local, W, H, idx % 2 === 0);
+      // fondu vers la scène suivante
+      if (local > 0.88 && idx < ready.length - 1) {
+        ctx.save(); ctx.globalAlpha = (local - 0.88) / 0.12;
+        drawFrame(ctx, ready[idx + 1], 0, W, H, (idx + 1) % 2 === 0); ctx.restore();
+      }
+      setStatus($("vidStatus"), `🎬 Enregistrement… ${Math.round((el / total) * 100)} %`);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  });
+  rec.stop(); await done;
+  if (audioEl) { audioEl.pause(); actx.close(); }
+
+  videoBlob = new Blob(chunks, { type: (mime || "video/webm").split(";")[0] });
+  $("out").src = URL.createObjectURL(videoBlob); $("out").style.display = "block";
+  $("btnShare").disabled = $("btnDl").disabled = false;
+  setStatus($("vidStatus"), `✅ Vidéo prête (${(videoBlob.size / 1e6).toFixed(1)} Mo, ${videoBlob.type}).`);
+}
+
+// ---------- 4. share / download ----------
+function videoFile() {
+  const ext = videoBlob.type.includes("mp4") ? "mp4" : "webm";
+  return new File([videoBlob], `tiktok-${Date.now()}.${ext}`, { type: videoBlob.type });
+}
+$("btnDl").onclick = () => {
+  const f = videoFile(); const a = document.createElement("a");
+  a.href = URL.createObjectURL(f); a.download = f.name; a.click();
+};
+$("btnShare").onclick = async () => {
+  const f = videoFile();
+  try { await navigator.clipboard.writeText($("caption").value); } catch {}
+  if (navigator.canShare && navigator.canShare({ files: [f] })) {
+    try { await navigator.share({ files: [f], text: $("caption").value }); } catch {}
+  } else {
+    $("btnDl").click();
+    window.open("https://www.tiktok.com/upload", "_blank");
+  }
+};
+$("btnCopy").onclick = async () => { await navigator.clipboard.writeText($("caption").value); $("btnCopy").textContent = "✅ Copié"; setTimeout(() => ($("btnCopy").textContent = "📋 Copier la légende"), 1500); };
+
+// ---------- buttons ----------
+async function run(btn, statusEl, fn) {
+  const all = document.querySelectorAll("button"); all.forEach((b) => (b.dataset.d = b.disabled, b.disabled = true));
+  try { await fn(); } catch (e) { setStatus(statusEl, "❌ " + e.message, true); }
+  finally { all.forEach((b) => { if (document.body.contains(b)) b.disabled = b.dataset.d === "true"; }); renderButtons(); }
+}
+function renderButtons() {
+  $("btnImgs").disabled = !scenes.length;
+  $("btnVideo").disabled = !scenes.some((s) => s.img);
+  $("btnShare").disabled = $("btnDl").disabled = !videoBlob;
+}
+$("btnPlan").onclick = () => run($("btnPlan"), $("planStatus"), planScenes);
+$("btnImgs").onclick = () => run($("btnImgs"), $("imgStatus"), genAllImages);
+$("btnVideo").onclick = () => run($("btnVideo"), $("vidStatus"), makeVideo);
+$("btnAll").onclick = () => run($("btnAll"), $("planStatus"), async () => { await planScenes(); await genAllImages(); await makeVideo(); });
+</script>
+</body>
+</html>
