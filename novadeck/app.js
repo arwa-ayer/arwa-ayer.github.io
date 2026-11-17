@@ -24,7 +24,7 @@ const COLLECTIONS = [
   { id: 'aurora', name: 'Aurora', tag: 'Bientôt disponible', color: '#c77dff', pal: ['#14092c', '#8a3cff', '#b8ffd9', '#2c1660', '#0a0518'], locked: true, cards: [] },
 ];
 const RARITY = ['Commune', 'Rare', 'Épique', 'Hors-série'];
-const RCOLOR = ['#8d93a3', '#4db8ff', '#c77dff', '#ffc53d'];
+const RCOLOR = ['#b79cc9', '#35f0ff', '#b98bff', '#ffe14d'];
 const FINISH = ['Standard', 'Holographique', 'Full art holo'];
 const KIND = { L: 'Lieu', B: 'Bolide', F: 'Figure', O: 'Objet' };
 const CARDS = [];
@@ -268,7 +268,7 @@ $('#tilt').addEventListener('pointerleave', () => { const el = $('#tilt .card');
 
 /* ---------- Roue ---------- */
 let rot = 0, spinning = false;
-$('#wheel').innerHTML = WHEEL.map((v, i) => `<span style="transform:rotate(${i * 45 + 22.5}deg)"><b style="color:${[0, 4].includes(i) || [2, 6, 7].includes(i) ? '#0b0d12' : i === 3 ? '#fff' : '#f3ecdd'}">${v ? '+' + v : 'RIEN'}</b></span>`).join('');
+$('#wheel').innerHTML = WHEEL.map((v, i) => `<span style="transform:rotate(${i * 45 + 22.5}deg)"><b style="color:${[0, 4].includes(i) || [2, 6, 7].includes(i) ? '#1a0420' : i === 3 ? '#1a0420' : '#fff4fc'}">${v ? '+' + v : 'RIEN'}</b></span>`).join('');
 function openWheel() {
   const spun = S.lastSpin === today();
   $('#wheelMsg').textContent = !S.user ? 'Crée ton compte pour tourner : un tour gratuit par jour.' : spun ? 'Tour du jour déjà utilisé. Reviens demain.' : 'Un tour gratuit par jour : des boosters à gagner.';
