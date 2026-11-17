@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nova Deck · Cartes à collectionner gratuites</title>
+<meta name="description" content="Ouvre des boosters, remplis ton classeur et grimpe au classement. 80 cartes, 4 collections, 3 finitions. Gratuit, sans inscription par e-mail.">
+<meta name="theme-color" content="#0b0d12">
+<meta property="og:title" content="Nova Deck · Cartes à collectionner gratuites">
+<meta property="og:description" content="Ouvre des boosters, remplis ton classeur et grimpe au classement.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0d12'/%3E%3Cpath d='M9 24V8l14 16V8' fill='none' stroke='%23c8ff3d' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preload" href="anton.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#classeur">Aller au classeur</a>
+
+<header class="top">
+  <a class="logo" href="#accueil" aria-label="Nova Deck, accueil"><span>NOVA</span><b>DECK</b></a>
+  <nav aria-label="Navigation principale">
+    <a href="#classeur">Classeur</a>
+    <a href="#boosters">Boosters</a>
+    <a href="#collections">Collections</a>
+    <a href="#classement">Classement</a>
+  </nav>
+  <div class="top-actions">
+    <button class="icon-btn" id="soundBtn" aria-pressed="true" aria-label="Son activé" title="Son">♪</button>
+    <button class="chip" id="packChip" hidden><b id="packCount">0</b> booster<span id="packPlural">s</span></button>
+    <button class="btn small" id="accountBtn">Créer mon compte</button>
+  </div>
+</header>
+
+<main id="accueil">
+  <section class="wheel-band" aria-label="Roue du jour">
+    <div class="mini-wheel" aria-hidden="true"></div>
+    <div>
+      <strong>La roue du jour</strong>
+      <span id="wheelBandText">Un tour gratuit par jour : jusqu’à 3 boosters à gagner.</span>
+    </div>
+    <button class="btn dark" data-open="wheel">Tourner ↗</button>
+  </section>
+
+  <section class="hero">
+    <div class="hero-main">
+      <p class="eyebrow">Saison 1 · L’archipel d’Halcyon</p>
+      <h1>Quatre villes.<br><em>80 cartes.</em><br>Un seul classeur.</h1>
+      <p class="lead">Ouvre des boosters, découvre les cartes une à une et complète tes collections. Trois finitions à chasser : standard, holographique et full art.</p>
+      <div class="hero-cta">
+        <button class="btn big" id="heroPack">Déchirer un paquet ↗</button>
+        <a class="btn ghost big" href="#classeur">Entrer dans le classeur</a>
+      </div>
+      <p class="fine" id="heroFine">Gratuit · 5 cartes par paquet · essai immédiat sans compte</p>
+    </div>
+    <div class="hero-fan" id="heroFan" aria-hidden="true"></div>
+    <aside class="countdown" aria-label="Prochaine collection">
+      <p class="eyebrow">Prochaine collection</p>
+      <h2>Aurora arrive</h2>
+      <div class="cd" id="cd" role="timer" aria-live="off">
+        <div><b data-cd="d">00</b><span>jours</span></div>
+        <div><b data-cd="h">00</b><span>heures</span></div>
+        <div><b data-cd="m">00</b><span>min</span></div>
+        <div><b data-cd="s">00</b><span>s</span></div>
+      </div>
+      <p class="fine">20 nouvelles cartes rejoindront le booster.</p>
+    </aside>
+  </section>
+
+  <section id="classeur" class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" id="binderStats">4 collections · 80 cartes · 0 spoiler</p>
+        <h2>Le classeur</h2>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrer les cartes">
+        <button class="pill on" data-filter="all">Toutes</button>
+        <button class="pill" data-filter="own">Possédées</button>
+        <button class="pill" data-filter="miss">Manquantes</button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Collections"></div>
+    <div class="progress"><div id="progBar"></div><span id="progText"></span></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="boosters" class="section booster">
+    <div class="booster-art"><div class="pack" id="showPack" aria-hidden="true"></div></div>
+    <div>
+      <p class="eyebrow">Le booster Nova Deck</p>
+      <h2>5 cartes. Toutes les collections. Une rare garantie.</h2>
+      <ul class="odds">
+        <li><i class="dot r0"></i>Commune <b>70 %</b></li>
+        <li><i class="dot r1"></i>Rare <b>22 %</b></li>
+        <li><i class="dot r2"></i>Épique <b>6,5 %</b></li>
+        <li><i class="dot r3"></i>Hors-série <b>1,5 %</b></li>
+      </ul>
+      <p class="fine">Finitions : holographique 15 % · full art holo 3 %. Avec un compte : 3 paquets offerts, puis 2 par jour.</p>
+      <div class="hero-cta">
+        <button class="btn big" id="boosterOpen">Ouvrir un paquet ↗</button>
+        <button class="btn ghost" data-open="code">J’ai un code</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="collections" class="section">
+    <div class="section-head"><div><p class="eyebrow">L’univers s’agrandit</p><h2>Les collections</h2></div></div>
+    <div class="worlds" id="worlds"></div>
+  </section>
+
+  <section id="classement" class="section">
+    <div class="section-head">
+      <div><p class="eyebrow">Ligue locale</p><h2>Les collectionneurs</h2></div>
+      <div class="filters" role="group" aria-label="Période">
+        <button class="pill on" data-rank="all">Général</button>
+        <button class="pill" data-rank="week">Cette semaine</button>
+      </div>
+    </div>
+    <ol class="rank" id="rank"></ol>
+    <p class="fine">Les rivaux sont simulés : la partie est enregistrée sur cet appareil, sans serveur.</p>
+  </section>
+</main>
+
+<footer>
+  <a class="logo" href="#accueil"><span>NOVA</span><b>DECK</b></a>
+  <p>Univers, noms et illustrations originaux. Jeu gratuit, sans achat.</p>
+  <a href="#accueil">Retour en haut ↑</a>
+</footer>
+
+<button class="fab" data-open="wheel" aria-label="Ouvrir la roue du jour"><span class="mini-wheel"></span><b>Roue</b></button>
+
+<dialog id="dlgAccount" class="dlg">
+  <button class="x" data-close aria-label="Fermer">×</button>
+  <div id="accountBody"></div>
+</dialog>
+
+<dialog id="dlgWheel" class="dlg">
+  <button class="x" data-close aria-label="Fermer">×</button>
+  <h3>La roue du jour</h3>
+  <p class="fine" id="wheelMsg">Un tour gratuit par jour.</p>
+  <div class="wheel-wrap"><div class="pointer" aria-hidden="true"></div><div class="wheel" id="wheel"></div></div>
+  <button class="btn big" id="spinBtn">Tourner ↗</button>
+</dialog>
+
+<dialog id="dlgCode" class="dlg">
+  <button class="x" data-close aria-label="Fermer">×</button>
+  <h3>J’ai un code</h3>
+  <form id="codeForm">
+    <label for="codeInput">Code promo</label>
+    <input id="codeInput" autocomplete="off" autocapitalize="characters" maxlength="24" required placeholder="BIENVENUE">
+    <p class="fine" id="codeMsg" role="status">Essaie BIENVENUE pour 2 boosters.</p>
+    <button class="btn big">Valider ↗</button>
+  </form>
+</dialog>
+
+<dialog id="dlgCard" class="dlg card-dlg">
+  <button class="x" data-close aria-label="Fermer">×</button>
+  <div class="tilt" id="tilt"></div>
+  <div class="card-info" id="cardInfo"></div>
+</dialog>
+
+<dialog id="dlgPack" class="dlg pack-dlg">
+  <button class="x" data-close aria-label="Fermer">×</button>
+  <div id="packStage"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js" defer></script>
+</body>
+</html>
