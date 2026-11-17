@@ -74,7 +74,7 @@ main{max-width:1280px;margin:0 auto;padding:1.2rem clamp(1rem,4vw,3rem) 4rem}
 .tab[disabled]{opacity:.5;cursor:not-allowed}
 .progress{position:relative;height:26px;border-radius:99px;background:var(--panel);border:1px solid var(--soft);margin:1rem 0;overflow:hidden}
 .progress div{height:100%;width:0;background:var(--lime);transition:width .6s}
-.progress span{position:absolute;inset:0;display:grid;place-items:center;font:700 .75rem var(--body);letter-spacing:.06em;mix-blend-mode:difference}
+.progress span{position:absolute;inset:0;display:grid;place-items:center;font:700 .75rem var(--body);letter-spacing:.06em;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem}
 .empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:3rem 1rem;border:2px dashed var(--soft);border-radius:14px}
 
