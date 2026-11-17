@@ -110,8 +110,15 @@ function art(c, wide) {
   return s + `<rect width="${W}" height="${H}" fill="url(#p${g})" opacity=".1"/></svg>`;
 }
 function cardHTML(c, f = 0, dup = 0, tag = 'div') {
-  return `<${tag} class="card r${c.r} f${f}"${tag === 'button' ? ` data-card="${c.id}" aria-label="${esc(c.name)}, ${RARITY[c.r]}, ${FINISH[f]}"` : ''}><span class="art">${art(c)}</span><span class="meta"><span class="name">${esc(c.name)}</span><span class="sub"><span>${pad(c.n)}/20 · ${KIND[c.kind]}</span><b>${RARITY[c.r]}</b></span></span>${dup > 1 ? `<span class="dup">×${dup}</span>` : ''}<span class="shine"></span></${tag}>`;
+  return `<${tag} class="card r${c.r} f${f}"${tag === 'button' ? ` data-card="${c.id}" aria-label="${esc(c.name)}, ${RARITY[c.r]}, ${FINISH[f]}"` : ''}><span class="art"><img data-art="${c.id}" src="img/${c.id}.webp" width="480" height="672" alt="" loading="lazy" decoding="async"></span><span class="meta"><span class="name">${esc(c.name)}</span><span class="sub"><span>${pad(c.n)}/20 · ${KIND[c.kind]}</span><b>${RARITY[c.r]}</b></span></span>${dup > 1 ? `<span class="dup">×${dup}</span>` : ''}<span class="shine"></span></${tag}>`;
 }
+
+/* Image absente ou en erreur : on retombe sur l'illustration dessinée par le code. */
+document.addEventListener('error', e => {
+  const t = e.target; if (!t.dataset || !t.dataset.art) return;
+  const id = t.dataset.art, w = id.startsWith('w-');
+  t.outerHTML = w ? art({ id, col: COLLECTIONS.find(c => c.id === id.slice(2)) }, true) : art(byId[id]);
+}, true);
 
 /* ---------- Interface générale ---------- */
 let toastT;
@@ -316,7 +323,7 @@ $$('[data-rank]').forEach(b => b.onclick = () => { rankMode = b.dataset.rank; $$
 /* ---------- Statique : héros, collections, compte à rebours ---------- */
 $('#heroFan').innerHTML = ['ambre-19', 'cyan-17', 'mesa-12', 'fer-16'].map((id, i) => cardHTML(byId[id], [0, 1, 0, 2][i])).join('');
 $('#showPack').innerHTML = '<span>NOVA<b>DECK</b></span><small>5 CARTES</small>';
-$('#worlds').innerHTML = COLLECTIONS.map(c => `<button class="world${c.locked ? ' locked' : ''}" data-world="${c.id}"${c.locked ? ' disabled' : ''}>${art({ id: c.id + '-w', col: c }, true)}<div><h3>${esc(c.name)}</h3><p>${esc(c.tag)}${c.locked ? '' : ' · 20 cartes'}</p></div></button>`).join('');
+$('#worlds').innerHTML = COLLECTIONS.map(c => `<button class="world${c.locked ? ' locked' : ''}" data-world="${c.id}"${c.locked ? ' disabled' : ''}><img data-art="w-${c.id}" src="img/w-${c.id}.webp" width="800" height="500" alt="" loading="lazy" decoding="async"><div><h3>${esc(c.name)}</h3><p>${esc(c.tag)}${c.locked ? '' : ' · 20 cartes'}</p></div></button>`).join('');
 $('#worlds').onclick = e => { const w = e.target.closest('[data-world]'); if (!w || w.disabled) return; curCol = COLLECTIONS.find(c => c.id === w.dataset.world); renderBinder(); location.hash = '#classeur'; };
 function tick() {
   let d = Math.max(0, RELEASE - Date.now()) / 1000 | 0;
